@@ -6,20 +6,36 @@
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>Archives | Milhouse</title>
+  <title>ResNet算法解读 | Milhouse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="热爱美食的小小码农">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Milhouse">
-<meta property="og:url" content="http://yoursite.com/archives/index.html">
+  <meta name="description" content="引言深度残差网络（Deep residual network,ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩： 图1 ResNet在ILSVRC和COCO 2015上的战绩 ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史： 图2 ImageNet分类Top-5误差 ResNet的作者  何凯">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ResNet算法解读">
+<meta property="og:url" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/index.html">
 <meta property="og:site_name" content="Milhouse">
-<meta property="og:description" content="热爱美食的小小码农">
+<meta property="og:description" content="引言深度残差网络（Deep residual network,ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩： 图1 ResNet在ILSVRC和COCO 2015上的战绩 ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史： 图2 ImageNet分类Top-5误差 ResNet的作者  何凯">
 <meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-5e98ec97def099a4e6fb6b7ce3b1d460_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-606573bdaaa97de6b8b10fb00f76d29a_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-dcf5688dad675cbe8fb8be243af5e1fd_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-252e6d9979a2a91c2d3033b9b73eb69f_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/1111.png">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/2222.png">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/3333.png">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-7cb9c03871ab1faa7ca23199ac403bd9_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-1dfd4022d4be28392ff44c49d6b4ed94_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-0892e5423616c30f69ded61111b111c0_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-ac88d9e118e3a85922188daba84f7efd_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-0a2c8a209a221817f91c1f1728327beb_b.jpg">
+<meta property="og:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-4e0bf37ecad2f306fe09d32a2d37d908_b.jpg">
+<meta property="article:published_time" content="2021-09-01T13:29:28.562Z">
+<meta property="article:modified_time" content="2021-09-01T13:29:28.626Z">
 <meta property="article:author" content="赵宇亮">
 <meta property="article:tag" content="美食">
 <meta property="article:tag" content="计算机视觉">
 <meta property="article:tag" content="电子">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-5e98ec97def099a4e6fb6b7ce3b1d460_b.jpg">
   
     <link rel="alternative" href="/atom.xml" title="Milhouse" type="application/atom+xml">
   
@@ -171,361 +187,308 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-ResNet算法解读" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      ResNet算法解读
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2021" class="archive-year">2021</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/" class="archive-article-date">
+
+        
+        <a href="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/" class="archive-article-date">
   	<time datetime="2021-09-01T13:29:28.562Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-09-01</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/">ResNet算法解读</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
+        
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
       
-        </div></section>
+        <h2 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h2><p>深度残差网络（Deep residual network,<br>ResNet）的提出是CNN图像史上的一件里程碑事件，让我们先看一下ResNet在ILSVRC和COCO 2015上的战绩：</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-5e98ec97def099a4e6fb6b7ce3b1d460_b.jpg" alt><br>图1 ResNet在ILSVRC和COCO 2015上的战绩</p>
+<p>ResNet取得了5项第一，并又一次刷新了CNN模型在ImageNet上的历史：</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-606573bdaaa97de6b8b10fb00f76d29a_b.jpg" alt><br>图2 ImageNet分类Top-5误差</p>
+<p>ResNet的作者 <a href="https://link.zhihu.com/?target=http%3A//kaiminghe.com/"> 何凯明 </a><br>也因此摘得CVPR2016最佳论文奖，当然何博士的成就远不止于此，感兴趣的可以去搜一下他后来的辉煌战绩。那么ResNet为什么会有如此优异的表现呢？其实ResNet是解决了深度CNN模型难训练的问题，从图2中可以看到14年的VGG才19层，而15年的ResNet多达152层，这在网络深度完全不是一个量级上，所以如果是第一眼看这个图的话，肯定会觉得ResNet是靠深度取胜。事实当然是这样，但是ResNet还有架构上的trick，这才使得网络的深度发挥出作用，这个trick就是残差学（Residual learning）。下面详细讲述ResNet的理论及实现。</p>
+<h2 id="深度网络的退化问题"><a href="#深度网络的退化问题" class="headerlink" title="深度网络的退化问题"></a>深度网络的退化问题</h2><p>从经验来看，网络的深度对模型的性能至关重要，当增加网络层数后，网络可以进行更加复杂的特征模式的提取，所以当模型更深时理论上可以取得更好的结果，从图2中也可以看出网络越深而效果越好的一个实践证据。但是更深的网络其性能一定会更好吗？实验发现深度网络出现了退化问题（Degradation problem）：网络深度增加时，网络准确度出现饱和，甚至出现下降。这个现象可以在图3中直观看出来：56层的网络比20层网络效果还要差。这不会是过拟合问题，因为56层网络的训练误差同样高。我们知道深层网络存在着梯度消失或者爆炸的问题，这使得深度学习模型很难训练。但是现在已经存在一些技术手段如BatchNorm来缓解这个问题。因此，出现深度网络的退化问题是非常令人诧异的。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-dcf5688dad675cbe8fb8be243af5e1fd_b.jpg" alt><br>图3 20层与56层网络在CIFAR-10上的误差</p>
+<h2 id="残差学习"><a href="#残差学习" class="headerlink" title="残差学习"></a>残差学习</h2><p>深度网络的退化问题至少说明深度网络不容易训练。但是我们考虑这样一个事实：现在你有一个浅层网络，你想通过向上堆积新层来建立深层网络，一个极端情况是这些增加的层什么也不学习，仅仅复制浅层网络的特征，即这样新层是恒等映射（Identity<br>mapping）。在这种情况下，深层网络应该至少和浅层网络性能一样，也不应该出现退化现象。好吧，你不得不承认肯定是目前的训练方法有问题，才使得深层网络很难去找到一个好的参数。</p>
+<p>这个有趣的假设让何博士灵感爆发，他提出了残差学习来解决退化问题。对于一个堆积层结构（几层堆积而成）当输入为  $\displaystyle x$ 时其学习到的特征记为  $\displaystyle H(x)$  ，现在我们希望其可以学习到残差 \displaystyle F(x)=H(x)-x$<br>，这样其实原始的学习特征是  $\displaystyle F(x)+x$ 。之所以这样是因为残差学习相比原始特征直接学习更容易。当残差为0时，此时堆积层仅仅做了恒等映射，至少网络性能不会下降，实际上残差不会为0，这也会使得堆积层在输入特征基础上学习到新的特征，从而拥有更好的性能。残差学习的结构如图4所示。这有点类似与电路中的“短路”，所以是一种短路连接（shortcut connection）。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-252e6d9979a2a91c2d3033b9b73eb69f_b.jpg" alt><br>图4 残差学习单元<br>为什么残差学习相对更容易，从直观上看残差学习需要学习的内容少，因为残差一般会比较小，学习难度小点。不过我们可以从数学的角度来分析这个问题，首先残差单元可以表示为：</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/1111.png" alt></p>
+<p>其中  $\displaystyle x_{l}$  和  $\displaystyle x_{l+1}$  分别表示的是第  $\displaystyle<br>l$  个残差单元的输入和输出，注意每个残差单元一般包含多层结构。  $\displaystyle F$  是残差函数，表示学习到的残差，而<br>$\displaystyle h(x_{l})=x_{l}$  表示恒等映射，  $\displaystyle f$<br>是ReLU激活函数。基于上式，我们求得从浅层  $\displaystyle l$  到深层  $\displaystyle L$  的学习特征为：</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/2222.png" alt></p>
+<p>利用链式规则，可以求得反向过程的梯度：</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/3333.png" alt></p>
+<p>式子的第一个因子表示的损失函数到达<br>$\displaystyle L$<br>的梯度，小括号中的1表明短路机制可以无损地传播梯度，而另外一项残差梯度则需要经过带有weights的层，梯度不是直接传递过来的。残差梯度不会那么巧全为-1，而且就算其比较小，有1的存在也不会导致梯度消失。所以残差学习会更容易。要注意上面的推导并不是严格的证明。</p>
+<h2 id="ResNet的网络结构"><a href="#ResNet的网络结构" class="headerlink" title="ResNet的网络结构"></a>ResNet的网络结构</h2><p>ResNet网络是参考了VGG19网络，在其基础上进行了修改，并通过短路机制加入了残差单元，如图5所示。变化主要体现在ResNet直接使用stride=2的卷积做下采样，并且用global average pool层替换了全连接层。ResNet的一个重要设计原则是：当feature map大小降低一半时，feature map的数量增加一倍，这保持了网络层的复杂度。从图5中可以看到，ResNet相比普通网络每两层间增加了短路机制，这就形成了残差学习，其中虚线表示feature map数量发生了改变。图5展示的34-layer的ResNet，还可以构建更深的网络如表1所示。从表中可以看到，对于18-layer和34-layer的ResNet，其进行的两层间的残差学习，当网络更深时，其进行的是三层间的残差学习，三层卷积核分别是1x1，3x3和1x1，一个值得注意的是隐含层的feature map数量是比较小的，并且是输出feature map数量的1/4。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-7cb9c03871ab1faa7ca23199ac403bd9_b.jpg" alt><br>图5 ResNet网络结构图<br><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-1dfd4022d4be28392ff44c49d6b4ed94_b.jpg" alt><br>表1 不同深度的ResNet</p>
+<p>下面我们再分析一下残差单元，ResNet使用两种残差单元，如图6所示。左图对应的是浅层网络，而右图对应的是深层网络。对于短路连接，当输入和输出维度一致时，可以直接将输入加到输出上。但是当维度不一致时（对应的是维度增加一倍），这就不能直接相加。有两种策略：（1）采用zero-padding增加维度，此时一般要先做一个downsamp，可以采用strde=2的pooling，这样不会增加参数；（2）采用新的映射（projection shortcut），一般采用1x1的卷积，这样会增加参数，也会增加计算量。短路连接除了直接使用恒等映射，当然都可以采用projection shortcut。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-0892e5423616c30f69ded61111b111c0_b.jpg" alt><br>图6 不同的残差单元</p>
+<p>作者对比18-layer和34-layer的网络效果，如图7所示。可以看到普通的网络出现退化现象，但是ResNet很好的解决了退化问题。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-ac88d9e118e3a85922188daba84f7efd_b.jpg" alt><br>图7 18-layer和34-layer的网络效果</p>
+<p>最后展示一下ResNet网络与其他网络在ImageNet上的对比结果，如表2所示。可以看到ResNet-152其误差降到了4.49%，当采用集成模型后，误差可以降到3.57%。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-0a2c8a209a221817f91c1f1728327beb_b.jpg" alt> 表2<br>ResNet与其他网络的对比结果</p>
+<p>说一点关于残差单元题外话，上面我们说到了短路连接的几种处理方式，其实作者在 <a href="https://link.zhihu.com/?target=https%3A//arxiv.org/abs/1603.05027"> 文献[2]
+</a><br>中又对不同的残差单元做了细致的分析与实验，这里我们直接抛出最优的残差结构，如图8所示。改进前后一个明显的变化是采用pre-<br>activation，BN和ReLU都提前了。而且作者推荐短路连接采用恒等变换，这样保证短路连接不会有阻碍。感兴趣的可以去读读这篇文章。</p>
+<p><img src="/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/v2-4e0bf37ecad2f306fe09d32a2d37d908_b.jpg" alt> 图8<br>改进后的残差单元及效果</p>
+<h2 id="ResNet的TensorFlow实现"><a href="#ResNet的TensorFlow实现" class="headerlink" title="ResNet的TensorFlow实现"></a>ResNet的TensorFlow实现</h2><p>这里给出ResNet50的TensorFlow实现，模型的实现参考了 <a href="https://link.zhihu.com/?target=https%3A//github.com/KaimingHe/deep-residual-
+networks"> Caffe版本
+</a> 的实现，核心代码如下：</p>
+<pre><code>class ResNet50(object):
+    def __init__(self, inputs, num_classes=1000, is_training=True,
+                 scope=&quot;resnet50&quot;):
+        self.inputs =inputs
+        self.is_training = is_training
+        self.num_classes = num_classes
+
+        with tf.variable_scope(scope):
+            # construct the model
+            net = conv2d(inputs, 64, 7, 2, scope=&quot;conv1&quot;) # -&gt; [batch, 112, 112, 64]
+            net = tf.nn.relu(batch_norm(net, is_training=self.is_training, scope=&quot;bn1&quot;))
+            net = max_pool(net, 3, 2, scope=&quot;maxpool1&quot;)  # -&gt; [batch, 56, 56, 64]
+            net = self._block(net, 256, 3, init_stride=1, is_training=self.is_training,
+                              scope=&quot;block2&quot;)           # -&gt; [batch, 56, 56, 256]
+            net = self._block(net, 512, 4, is_training=self.is_training, scope=&quot;block3&quot;)
+                                                        # -&gt; [batch, 28, 28, 512]
+            net = self._block(net, 1024, 6, is_training=self.is_training, scope=&quot;block4&quot;)
+                                                        # -&gt; [batch, 14, 14, 1024]
+            net = self._block(net, 2048, 3, is_training=self.is_training, scope=&quot;block5&quot;)
+                                                        # -&gt; [batch, 7, 7, 2048]
+            net = avg_pool(net, 7, scope=&quot;avgpool5&quot;)    # -&gt; [batch, 1, 1, 2048]
+            net = tf.squeeze(net, [1, 2], name=&quot;SpatialSqueeze&quot;) # -&gt; [batch, 2048]
+            self.logits = fc(net, self.num_classes, &quot;fc6&quot;)       # -&gt; [batch, num_classes]
+            self.predictions = tf.nn.softmax(self.logits)
+
+
+    def _block(self, x, n_out, n, init_stride=2, is_training=True, scope=&quot;block&quot;):
+        with tf.variable_scope(scope):
+            h_out = n_out // 4
+            out = self._bottleneck(x, h_out, n_out, stride=init_stride,
+                                   is_training=is_training, scope=&quot;bottlencek1&quot;)
+            for i in range(1, n):
+                out = self._bottleneck(out, h_out, n_out, is_training=is_training,
+                                       scope=(&quot;bottlencek%s&quot; % (i + 1)))
+            return out
+
+    def _bottleneck(self, x, h_out, n_out, stride=None, is_training=True, scope=&quot;bottleneck&quot;):
+        &quot;&quot;&quot; A residual bottleneck unit&quot;&quot;&quot;
+        n_in = x.get_shape()[-1]
+        if stride is None:
+            stride = 1 if n_in == n_out else 2
+
+        with tf.variable_scope(scope):
+            h = conv2d(x, h_out, 1, stride=stride, scope=&quot;conv_1&quot;)
+            h = batch_norm(h, is_training=is_training, scope=&quot;bn_1&quot;)
+            h = tf.nn.relu(h)
+            h = conv2d(h, h_out, 3, stride=1, scope=&quot;conv_2&quot;)
+            h = batch_norm(h, is_training=is_training, scope=&quot;bn_2&quot;)
+            h = tf.nn.relu(h)
+            h = conv2d(h, n_out, 1, stride=1, scope=&quot;conv_3&quot;)
+            h = batch_norm(h, is_training=is_training, scope=&quot;bn_3&quot;)
+
+            if n_in != n_out:
+                shortcut = conv2d(x, n_out, 1, stride=stride, scope=&quot;conv_4&quot;)
+                shortcut = batch_norm(shortcut, is_training=is_training, scope=&quot;bn_4&quot;)
+            else:
+                shortcut = x
+            return tf.nn.relu(shortcut + h)
+</code></pre><p>完整实现可以参见 <a href="https://link.zhihu.com/?target=https%3A//github.com/xiaohu2015/DeepLearning_tutorials/"> GitHub
+</a><br>。</p>
+
+      
+
+      
+        <div class="page-reward">
+          <a href="javascript:;" class="page-reward-btn tooltip-top">
+            <div class="tooltip tooltip-east">
+            <span class="tooltip-item">
+              赏
+            </span>
+            <span class="tooltip-content">
+              <span class="tooltip-text">
+                <span class="tooltip-inner">
+                  <p class="reward-p"><i class="icon icon-quo-left"></i>谢谢你请我吃糖果<i class="icon icon-quo-right"></i></p>
+                  <div class="reward-box">
+                    
+                    
+                  </div>
+                </span>
+              </span>
+            </span>
+          </div>
+          </a>
+        </div>
+      
+    </div>
+    <div class="article-info article-info-index">
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/Numpy%E5%8F%AF%E8%A7%86%E5%8C%96%E5%9B%BE%E8%A7%A3/" class="archive-article-date">
-  	<time datetime="2020-05-23T10:20:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-05-23</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/Numpy%E5%8F%AF%E8%A7%86%E5%8C%96%E5%9B%BE%E8%A7%A3/">Numpy可视化图解</a>
-    </h1>
-  
+      </div>
+    </span>
+  </div>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color1">NumPy</a>
-        		</li>
-      		
-		</ul>
-	</div>
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/" alt="微信分享二维码">
+    </div>
+</div>
 
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/计算机视觉//" class="article-tag-list-link color1">计算机视觉</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/%E4%BB%A3%E7%A0%81%E6%95%B4%E6%B4%81%E4%B9%8B%E9%81%93/" class="archive-article-date">
-  	<time datetime="2020-04-30T01:47:22.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-30</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/Numpy%E5%8F%AF%E8%A7%86%E5%8C%96%E5%9B%BE%E8%A7%A3/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Numpy可视化图解</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
+        
+        
+    </div>
+</aside>
+
+
+
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/%E4%BB%A3%E7%A0%81%E6%95%B4%E6%B4%81%E4%B9%8B%E9%81%93/">代码整洁之道</a>
-    </h1>
-  
+    <div class="valine_comment"></div>
+<!--载入js，在</body>之前插入即可-->
+<!--Leancloud 操作库:-->
+<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<!--Valine 的核心代码库-->
+<script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+<script>
+  var notify = 'false' == true ? true : false;
+  var verify = 'false' == true ? true : false;
+  new Valine({
+      av: AV,
+      el: '.valine_comment',
+      emoticon_url: 'https://cloud.panjunwen.com/alu',
+      emoticon_list: ["狂汗.png","不说话.png","汗.png","坐等.png","献花.png","不高兴.png","中刀.png","害羞.png","皱眉.png","小眼睛.png","暗地观察.png"],
+      app_id: '0Gks2AF0pSFBhJoTcBPgdHpK-gzGzoHsz',
+      app_key: 'JyE1q4YOPEWcqtby7MUL4GU1',
+      placeholder: 'ヾﾉ≧∀≦)o来啊，快活啊!'
+    });
+</script>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/代码规范//" class="article-tag-list-link color5">代码规范</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E4%BD%BF%E7%94%A8Git/" class="archive-article-date">
-  	<time datetime="2020-04-24T02:22:55.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-24</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/%E5%A6%82%E4%BD%95%E4%BC%98%E9%9B%85%E7%9A%84%E4%BD%BF%E7%94%A8Git/">如何优雅的使用Git</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color4">Git</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/计算机工具//" class="article-tag-list-link color1">计算机工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89%E7%A7%91%E6%99%AE/" class="archive-article-date">
-  	<time datetime="2020-03-25T12:07:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89%E7%A7%91%E6%99%AE/">计算机视觉科普</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">图像处理</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">深度学习</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/计算机视觉//" class="article-tag-list-link color1">计算机视觉</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/Faster%20RCNN%20%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/" class="archive-article-date">
-  	<time datetime="2020-03-24T10:20:58.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-24</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/Faster%20RCNN%20%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/">Faster RCNN 算法解读</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color2">python</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/web前端//" class="article-tag-list-link color1">web前端</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/%E6%8F%AD%E5%BC%80%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E7%A5%9E%E7%A7%98%E9%9D%A2%E7%BA%B1/" class="archive-article-date">
-  	<time datetime="2020-03-24T03:05:43.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-03-24</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/%E6%8F%AD%E5%BC%80%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E7%9A%84%E7%A5%9E%E7%A7%98%E9%9D%A2%E7%BA%B1/">揭开深度学习的神秘面纱</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">深度学习</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color5">神经网络</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/计算机视觉//" class="article-tag-list-link color1">计算机视觉</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
+  <div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="ResNet算法解读" data-title="ResNet算法解读" data-url="http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
   
 
-    
+  
+  <div id="cloud-tie-wrapper" class="cloud-tie-wrapper"></div>
+<script>
+  var cloudTieConfig = {
+    url: "http://yoursite.com/ResNet%E7%AE%97%E6%B3%95%E8%A7%A3%E8%AF%BB/", 
+    sourceId: "ResNet算法解读",
+    productKey: "true",
+    target: "cloud-tie-wrapper"
+  };
+</script>
+<script src="//img1.cache.netease.com/f2e/tie/yun/sdk/loader.js"></script>
+  
+
+  
+  <div id="SOHUCS" sid="ResNet算法解读" ></div> 
+<script charset="utf-8" type="text/javascript" src="//changyan.sohu.com/upload/changyan.js" ></script>
+<script type="text/javascript">
+    window.changyan.api.config({
+        appid: "true",
+        conf: "true"
+    });
+</script>
+</script>
+  
+
+  
+
+  
 
 
           </div>
@@ -548,8 +511,8 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: true,
